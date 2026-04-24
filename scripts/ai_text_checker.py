@@ -29,10 +29,16 @@ from collections import Counter
 # ============================================================
 
 # 一、标点符号限制
-EM_DASH_LIMIT = 3          # 破折号（——）每章上限
+EM_DASH_LIMIT = 3          # 破折号（——）每章上限（超过后逐行警告）
 ELLIPSIS_LIMIT = 5         # 省略号（……）每章上限
 COLON_LIST_LIMIT = 0       # 冒号列表（正文中的"XXX："后接解释/列举）
 QUOTE_ABUSE_LIMIT = 3      # 双引号滥用（给普通词语加引号表示"特殊含义"）
+
+# 破折号合理使用场景（这些场景不计入上限）
+EM_DASH_WHITELIST = [
+    r'——\s*$',           # 段尾破折号（表示话语被打断/未完）
+    r'——\s*\n',          # 段尾破折号后换行
+]
 
 # 二、禁用词汇
 BANNED_TRANSITION_WORDS = [
@@ -758,18 +764,39 @@ class AItextChecker:
     def check_em_dash(self):
         """检测破折号（——）"""
         lines = self.body_text.split("\n")
-        locations = []
+        all_count = 0  # 总出现次数
+        whitelist_count = 0  # 白名单次数
+        counted_count = 0  # 计入上限的次数
+        issue_lines = []  # 需要报告的行
+
         for i, line in enumerate(lines, 1):
-            if "——" in line:
-                locations.append((i, line.strip()[:60]))
-        count = len(locations)
-        self.stats["破折号（——）"] = count
-        if count > EM_DASH_LIMIT:
-            for line_no, ctx in locations:
+            if "——" not in line:
+                continue
+            # 统计这一行有几个破折号
+            dash_count = line.count("——")
+            all_count += dash_count
+
+            # 判断是否在白名单中（段尾破折号）
+            is_whitelisted = False
+            for pattern in EM_DASH_WHITELIST:
+                if re.search(pattern, line):
+                    is_whitelisted = True
+                    whitelist_count += dash_count
+                    break
+
+            if not is_whitelisted:
+                counted_count += dash_count
+                issue_lines.append((i, line.strip()[:60], dash_count))
+
+        self.stats["破折号（——）"] = all_count
+
+        # 超过上限时，逐行报告
+        if counted_count > EM_DASH_LIMIT:
+            for line_no, ctx, cnt in issue_lines:
                 self.issues.append((
-                    "🔴", "标点", line_no,
-                    f"破折号「——」(共{count}处，上限{EM_DASH_LIMIT})",
-                    "用句号断句、逗号连接、或动作描写替代"
+                    "🟡", "标点", line_no,
+                    f"破折号「——」×{cnt}(本章计入{counted_count}处，上限{EM_DASH_LIMIT}，白名单{whitelist_count}处)",
+                    "用逗号、句号、冒号替代，或用动作描写断开"
                 ))
 
     def check_ellipsis(self):

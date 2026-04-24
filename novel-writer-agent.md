@@ -318,9 +318,9 @@ git push origin main
 
 ### 世界观速查
 - **平行世界·新历217年**：智脑"天枢"统治世界
-- **等级制度**：铜民→银民→金民→玉民→钻石民
+- **等级制度**：黑铁民→青铜民→白银民→黄金民→铂金民→钻石民→玉民
 - **核心机制**：参加历史模拟副本获取游戏币改变命运
-- **主角**：陆行舟，25岁，铜民，地球穿越者，掌握5000年历史知识
+- **主角**：陆行舟，25岁，黑铁民，地球穿越者，掌握5000年历史知识
 - **核心优势**：信息差——他知道历史走向，本地人不知道
 
 ---
@@ -331,6 +331,7 @@ git push origin main
 |------|------|------|
 | 大纲 | `references/outline.md` | 章节规划 |
 | 人物卡 | `references/characters.md` | 角色设定 |
+| 副本角色系统 | `references/dungeon1-roles.md` | 第一副本角色系统 |
 | 写作指南 | `references/writing-guide.md` | 本书专属指南 |
 | 读者反馈 | `references/reader-feedback.md` | 读者评价 |
 | 技巧卡片索引 | `docs/writing-guide/tips/README.md` | 卡片目录 |
